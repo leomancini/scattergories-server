@@ -157,15 +157,13 @@ router.get('/createGame', (request, response) => {
 
                     const numPromptsNeededToFillSheets = (gameConfig.numAnswerSheetsPerGame * gameConfig.numPromptsPerAnswerSheet);
 
-                    let promptsLibrary = shuffle(resultsWithoutPII),
+                    let promptsLibrary = resultsWithoutPII,
                         prompts;
 
                     if (promptsLibrary.length < numPromptsNeededToFillSheets) {
                         prompts = new Array(numPromptsNeededToFillSheets).fill(null).map(() => {
-                            return promptsLibrary[Math.floor(Math.random() * promptsLibrary.length)];
-                        });
-
-                        shuffle(prompts);
+                            return shuffle(promptsLibrary);
+                        }).flat();
                     } else {
                         prompts = promptsLibrary;
                     }
@@ -178,8 +176,6 @@ router.get('/createGame', (request, response) => {
                             promptsListEnd = promptsListStart + gameConfig.numPromptsPerAnswerSheet;
 
                         let promptsForThisAnswerSheet = prompts.slice(promptsListStart, promptsListEnd);
-
-                        shuffle(promptsForThisAnswerSheet);
 
                         answerSheets[`sheet_${answerSheetsSetIndex}`] = {
                             metadata: {
