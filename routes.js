@@ -140,6 +140,7 @@ router.get('/deletePrompt', (request, response) => {
     });
 });
 
+
 router.get('/createGame', (request, response) => {
     mongo.connect(`${databaseConfig.url}/${databaseConfig.db}`, { useUnifiedTopology: true }, function (error, connection) {
         if (error) {
@@ -161,9 +162,13 @@ router.get('/createGame', (request, response) => {
                         prompts;
 
                     if (promptsLibrary.length < numPromptsNeededToFillSheets) {
-                        prompts = new Array(numPromptsNeededToFillSheets).fill(null).map(() => {
-                            return shuffle(promptsLibrary);
-                        }).flat();
+                        prompts = new Array();
+
+                        numPromptsLibrariesNeededToFillSheets = numPromptsNeededToFillSheets / promptsLibrary.length;
+
+                        for (numPromptsLibrariesAdded = 0; numPromptsLibrariesAdded <= gameConfig.numAnswerSheetsPerGame; numPromptsLibrariesAdded++) {
+                            prompts = prompts.concat(shuffle(promptsLibrary));
+                        }
                     } else {
                         prompts = promptsLibrary;
                     }
