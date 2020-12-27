@@ -155,17 +155,37 @@ router.get('/createGame', (request, response) => {
                         return prompt.prompt
                     });
 
+                    const numPromptsNeededToFillSheets = (gameConfig.numAnswerSheetsPerGame * gameConfig.numPromptsPerAnswerSheet);
+
+                    let promptsLibrary = shuffle(resultsWithoutPII),
+                        prompts;
+
+                    if (promptsLibrary.length < numPromptsNeededToFillSheets) {
+                        prompts = new Array(numPromptsNeededToFillSheets).fill(null).map(() => {
+                            return promptsLibrary[Math.floor(Math.random() * promptsLibrary.length)];
+                        });
+
+                        shuffle(prompts);
+                    } else {
+                        prompts = promptsLibrary;
+                    }
+
                     let answerSheets = {};
                     let answerSheetsSetIndex;
 
                     for (answerSheetsSetIndex = 1; answerSheetsSetIndex <= gameConfig.numAnswerSheetsPerGame; answerSheetsSetIndex++) {
-                        shuffle(resultsWithoutPII);
+                        let promptsListStart = (answerSheetsSetIndex - 1) * gameConfig.numPromptsPerAnswerSheet,
+                            promptsListEnd = promptsListStart + gameConfig.numPromptsPerAnswerSheet;
+
+                        let promptsForThisAnswerSheet = prompts.slice(promptsListStart, promptsListEnd);
+
+                        shuffle(promptsForThisAnswerSheet);
 
                         answerSheets[`sheet_${answerSheetsSetIndex}`] = {
                             metadata: {
                                 played: false
                             },
-                            prompts: resultsWithoutPII.slice(0, gameConfig.numPromptsPerAnswerSheet)
+                            prompts: promptsForThisAnswerSheet
                         };
                     }
 
